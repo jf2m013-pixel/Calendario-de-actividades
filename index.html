@@ -1,0 +1,1727 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema PAO 2026-2027 - Municipalidad de Sarapiquí</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- SweetAlert2 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        celeste: '#8BD1D9',
+                        verdeClaro: '#CBD99A',
+                        verdeOscuro: '#278C70',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .view-section { 
+            display: none; 
+            height: 100%; 
+            flex-direction: column; 
+            overflow: hidden; 
+        }
+        .view-section.active { 
+            display: flex; 
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        .sortable-th {
+            cursor: pointer;
+            user-select: none;
+        }
+        .sortable-th:hover {
+            background-color: #e2e8f0;
+        }
+        .drop-cell-hover {
+            background-color: #ecfdf5 !important;
+            outline: 2px dashed #278C70;
+            outline-offset: -2px;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 h-screen w-screen flex overflow-hidden select-none">
+
+    <!-- SIDEBAR LATERAL -->
+    <aside class="w-72 bg-slate-900 text-white flex flex-col justify-between z-20 shadow-xl flex-shrink-0">
+        <div>
+            <!-- Logo / Header Sidebar -->
+            <div class="p-5 border-b border-slate-800 flex items-center space-x-3">
+                <div class="h-12 w-12 rounded-full bg-verdeOscuro text-white flex items-center justify-center font-bold text-xl shadow-inner flex-shrink-0">
+                    MS
+                </div>
+                <div>
+                    <h1 class="font-bold text-sm tracking-wide leading-tight">Municipalidad de Sarapiquí</h1>
+                    <span class="text-xs text-verdeClaro font-medium">Gestión PAO 2026 - 2027</span>
+                </div>
+            </div>
+
+            <!-- Navegación principal -->
+            <nav class="p-4 space-y-2">
+                <button onclick="switchView('view-cronograma')" id="nav-cronograma" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all bg-verdeOscuro text-white shadow-lg shadow-verdeOscuro/30">
+                    <i class="fa-solid fa-calendar-days text-lg w-6"></i>
+                    <span>Cronograma (Oct 26 - Dic 27)</span>
+                </button>
+                <button onclick="switchView('view-metas')" id="nav-metas" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all text-slate-300 hover:bg-slate-800 hover:text-white">
+                    <i class="fa-solid fa-bullseye text-lg w-6"></i>
+                    <span>Matriz de Metas PAO</span>
+                </button>
+                <button onclick="openSchemaModal()" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all text-slate-300 hover:bg-slate-800 hover:text-white">
+                    <i class="fa-solid fa-gears text-lg w-6"></i>
+                    <span>Editor de Campos</span>
+                </button>
+            </nav>
+
+            <div class="mx-4 mt-2 p-3 rounded-xl bg-slate-800/70 border border-slate-700 text-[11px] text-slate-300 space-y-1">
+                <p class="font-bold text-verdeClaro"><i class="fa-solid fa-circle-info mr-1"></i>Funciones Activas:</p>
+                <p>• <b>Arrastrar y soltar:</b> Mantén clic sobre una actividad para moverla de día.</p>
+                <p>• <b>PAO 2026 y 2027:</b> Tus datos previos están respaldados.</p>
+            </div>
+        </div>
+
+        <!-- Footer Sidebar -->
+        <div class="p-4 border-t border-slate-800 bg-slate-950/50">
+            <div class="flex items-center space-x-3 bg-slate-900/80 p-3 rounded-xl border border-slate-800">
+                <span class="relative flex h-3 w-3">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                </span>
+                <div class="text-xs">
+                    <p class="font-semibold text-slate-200">Sincronización Local</p>
+                    <p class="text-slate-400">Datos Guardados Activos</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- CONTENEDOR PRINCIPAL -->
+    <main class="flex-1 flex flex-col h-full overflow-hidden bg-slate-50">
+        
+        <!-- HEADER -->
+        <header class="h-18 bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between z-10 shadow-sm flex-shrink-0">
+            <div class="flex items-center space-x-4">
+                <div class="bg-verdeClaro/20 text-verdeOscuro p-2.5 rounded-xl border border-verdeClaro/40">
+                    <i class="fa-solid fa-landmark text-xl"></i>
+                </div>
+                <div>
+                    <h2 class="text-base font-bold text-slate-900 tracking-tight">Sistema de Programación Anual y Control PAO (Oct 2026 - Dic 2027)</h2>
+                    <p class="text-xs text-slate-500">Plan Anual Operativo 2026 y 2027 - Cantón de Sarapiquí</p>
+                </div>
+            </div>
+
+            <!-- Filtro Global PAO + Botones de Respaldo -->
+            <div class="flex items-center space-x-3">
+                <div class="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs font-bold">
+                    <button onclick="setYearFilter('all')" id="btn-filter-all" class="px-3 py-1.5 rounded-lg bg-verdeOscuro text-white transition-all">Todos (26/27)</button>
+                    <button onclick="setYearFilter('2026')" id="btn-filter-2026" class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all">PAO 2026</button>
+                    <button onclick="setYearFilter('2027')" id="btn-filter-2027" class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all">PAO 2027</button>
+                </div>
+
+                <div class="flex items-center space-x-2">
+                    <button onclick="exportJSON()" title="Exportar Respaldo JSON" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition-all border border-slate-200 flex items-center space-x-1.5">
+                        <i class="fa-solid fa-download text-verdeOscuro"></i>
+                        <span class="hidden sm:inline">Exportar</span>
+                    </button>
+                    <label title="Cargar Respaldo JSON" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition-all border border-slate-200 flex items-center space-x-1.5 cursor-pointer">
+                        <i class="fa-solid fa-upload text-verdeOscuro"></i>
+                        <span class="hidden sm:inline">Cargar</span>
+                        <input type="file" id="importFile" accept=".json" class="hidden" onchange="importJSON(event)">
+                    </label>
+                    <button onclick="resetFactoryData()" title="Restaurar de Fábrica" class="p-2 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl text-xs font-semibold transition-all border border-rose-200">
+                        <i class="fa-solid fa-rotate-right"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- CONTENIDO VISTAS -->
+        <div class="flex-1 relative overflow-hidden">
+            
+            <!-- VISTA 1: CRONOGRAMA (OCT 2026 - DIC 2027) -->
+            <section id="view-cronograma" class="view-section active p-6 overflow-y-auto">
+                
+                <!-- 4 KPIs de Cronograma Solicitados -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-5 flex-shrink-0">
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-3.5">
+                        <div class="w-11 h-11 rounded-xl bg-emerald-50 text-verdeOscuro flex items-center justify-center text-lg font-bold border border-emerald-100 flex-shrink-0">
+                            <i class="fa-solid fa-bullseye"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-[11px] font-bold uppercase text-slate-400">Total de Metas</p>
+                            <h3 id="kpi-crono-metas" class="text-xl font-extrabold text-slate-900">0</h3>
+                            <div class="flex space-x-2 mt-0.5 text-[11px] font-semibold">
+                                <span class="text-amber-700">2026: <b id="kpi-crono-metas26">0</b></span>
+                                <span class="text-verdeOscuro">2027: <b id="kpi-crono-metas27">0</b></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-3.5">
+                        <div class="w-11 h-11 rounded-xl bg-cyan-50 text-cyan-600 flex items-center justify-center text-lg font-bold border border-cyan-100 flex-shrink-0">
+                            <i class="fa-solid fa-layer-group"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-[11px] font-bold uppercase text-slate-400">Total de Actividades</p>
+                            <h3 id="kpi-crono-plan-total" class="text-xl font-extrabold text-slate-900">0</h3>
+                            <div class="flex space-x-2 mt-0.5 text-[11px] font-semibold">
+                                <span class="px-1.5 py-0.5 bg-slate-100 rounded text-slate-700">I Sem: <b id="kpi-crono-plan-i">0</b></span>
+                                <span class="px-1.5 py-0.5 bg-slate-100 rounded text-slate-700">II Sem: <b id="kpi-crono-plan-ii">0</b></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-3.5">
+                        <div class="w-11 h-11 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg font-bold border border-indigo-100 flex-shrink-0">
+                            <i class="fa-solid fa-calendar-check"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-[11px] font-bold uppercase text-slate-400">Actividades Programadas</p>
+                            <h3 id="kpi-crono-prog-total" class="text-xl font-extrabold text-indigo-600">0</h3>
+                            <div class="flex space-x-2 mt-0.5 text-[11px] font-semibold">
+                                <span class="px-1.5 py-0.5 bg-indigo-50 rounded text-indigo-700">I Sem: <b id="kpi-crono-prog-i">0</b></span>
+                                <span class="px-1.5 py-0.5 bg-indigo-50 rounded text-indigo-700">II Sem: <b id="kpi-crono-prog-ii">0</b></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-3.5">
+                        <div class="w-11 h-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg font-bold border border-amber-100 flex-shrink-0">
+                            <i class="fa-solid fa-hourglass-half"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-[11px] font-bold uppercase text-slate-400">Actividades Pendientes</p>
+                            <h3 id="kpi-crono-pend-total" class="text-xl font-extrabold text-amber-600">0</h3>
+                            <div class="flex space-x-2 mt-0.5 text-[11px] font-semibold">
+                                <span class="px-1.5 py-0.5 bg-amber-50 rounded text-amber-700">I Sem: <b id="kpi-crono-pend-i">0</b></span>
+                                <span class="px-1.5 py-0.5 bg-amber-50 rounded text-amber-700">II Sem: <b id="kpi-crono-pend-ii">0</b></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Controles Superiores del Calendario -->
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm mb-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4 flex-shrink-0">
+                    <div class="flex flex-wrap items-center gap-2.5">
+                        <div class="flex items-center space-x-2 bg-slate-100 p-1 rounded-xl border border-slate-200">
+                            <button onclick="changeMonth(-1)" class="w-8 h-8 rounded-lg bg-white shadow-sm flex items-center justify-center text-slate-600 hover:text-verdeOscuro font-bold transition-all">
+                                <i class="fa-solid fa-chevron-left text-xs"></i>
+                            </button>
+                            <select id="month-selector" onchange="jumpToMonthIndex(this.value)" class="px-3 py-1 bg-transparent font-bold text-slate-800 text-sm outline-none cursor-pointer text-center">
+                                <!-- 15 meses (Oct 2026 - Dic 2027) -->
+                            </select>
+                            <button onclick="changeMonth(1)" class="w-8 h-8 rounded-lg bg-white shadow-sm flex items-center justify-center text-slate-600 hover:text-verdeOscuro font-bold transition-all">
+                                <i class="fa-solid fa-chevron-right text-xs"></i>
+                            </button>
+                        </div>
+                        <button onclick="jumpToMonthIndex(0)" class="px-3 py-2 bg-amber-50 hover:bg-amber-100 text-amber-800 font-bold text-xs rounded-xl border border-amber-200 transition-all">
+                            Octubre 2026 (Hoy)
+                        </button>
+                        <button onclick="jumpToMonthIndex(3)" class="px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-verdeOscuro font-bold text-xs rounded-xl border border-emerald-200 transition-all">
+                            Enero 2027
+                        </button>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-3">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-xs font-semibold text-slate-500">Filtrar Meta:</span>
+                            <select id="filter-meta" onchange="renderCalendar()" class="bg-slate-50 border border-slate-200 text-slate-700 text-xs rounded-xl px-3 py-2 outline-none focus:border-verdeOscuro font-medium max-w-[210px]">
+                                <option value="all">Todas las metas</option>
+                                <option value="none">No asignado en el PAO</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-xs font-semibold text-slate-500">Semestre:</span>
+                            <select id="filter-semestre" onchange="renderCalendar()" class="bg-slate-50 border border-slate-200 text-slate-700 text-xs rounded-xl px-3 py-2 outline-none focus:border-verdeOscuro font-medium">
+                                <option value="all">Todo el periodo</option>
+                                <option value="1">I Semestre (Ene - Jun)</option>
+                                <option value="2">II Semestre (Jul - Dic)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Grilla Calendario -->
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm flex-1 flex flex-col overflow-hidden min-h-[470px]">
+                    <div class="grid grid-cols-7 bg-slate-100 border-b border-slate-200 text-center font-bold text-xs text-slate-600 py-3">
+                        <div>Lunes</div>
+                        <div>Martes</div>
+                        <div>Miércoles</div>
+                        <div>Jueves</div>
+                        <div>Viernes</div>
+                        <div>Sábado</div>
+                        <div>Domingo</div>
+                    </div>
+                    <div id="calendar-grid" class="grid grid-cols-7 flex-1 auto-rows-fr bg-slate-200 gap-px overflow-y-auto"></div>
+                </div>
+            </section>
+
+            <!-- VISTA 2: MATRIZ DE METAS PAO -->
+            <section id="view-metas" class="view-section p-6 overflow-y-auto">
+                <!-- Panel Superior 3 KPIs de Presupuesto Solicitados -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 flex-shrink-0">
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
+                        <div class="w-12 h-12 rounded-xl bg-emerald-50 text-verdeOscuro flex items-center justify-center text-xl font-bold border border-emerald-100">
+                            <i class="fa-solid fa-sack-dollar"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs font-semibold text-slate-400">Total Presupuesto PAO</p>
+                            <h3 id="meta-kpi-budget-total" class="text-xl font-bold text-slate-900 mt-0.5">₡0</h3>
+                        </div>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
+                        <div class="w-12 h-12 rounded-xl bg-cyan-50 text-cyan-600 flex items-center justify-center text-xl font-bold border border-cyan-100">
+                            <i class="fa-solid fa-coins"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs font-semibold text-slate-400">Presupuesto I Semestre</p>
+                            <h3 id="meta-kpi-budget-isem" class="text-xl font-bold text-cyan-700 mt-0.5">₡0</h3>
+                        </div>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
+                        <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl font-bold border border-indigo-100">
+                            <i class="fa-solid fa-money-bill-trend-up"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs font-semibold text-slate-400">Presupuesto II Semestre</p>
+                            <h3 id="meta-kpi-budget-iisem" class="text-xl font-bold text-indigo-700 mt-0.5">₡0</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Barra de Herramientas Matriz -->
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm mb-6 flex flex-wrap items-center justify-between gap-4 flex-shrink-0">
+                    <div class="flex flex-wrap items-center gap-3">
+                        <div class="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs font-bold">
+                            <button onclick="setYearFilter('all')" id="tab-meta-all" class="px-3 py-1.5 rounded-lg bg-verdeOscuro text-white transition-all">Todas (26/27)</button>
+                            <button onclick="setYearFilter('2026')" id="tab-meta-2026" class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all">Metas PAO 2026</button>
+                            <button onclick="setYearFilter('2027')" id="tab-meta-2027" class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all">Metas PAO 2027</button>
+                        </div>
+
+                        <div class="flex items-center space-x-2">
+                            <span class="text-xs font-semibold text-slate-500">Ordenar por:</span>
+                            <select id="sort-metas-select" onchange="applySelectSort()" class="bg-slate-50 border border-slate-200 text-slate-700 text-xs rounded-xl px-3 py-2 outline-none focus:border-verdeOscuro font-medium">
+                                <option value="default">Orden de registro</option>
+                                <option value="anioPao:desc">Año PAO (2027 a 2026)</option>
+                                <option value="anioPao:asc">Año PAO (2026 a 2027)</option>
+                                <option value="responsable:asc">Responsable (A - Z)</option>
+                                <option value="responsable:desc">Responsable (Z - A)</option>
+                                <option value="presupuesto:desc">Presupuesto Total (Mayor a Menor)</option>
+                                <option value="presupuesto:asc">Presupuesto Total (Menor a Mayor)</option>
+                                <option value="presupuestoI:desc">Presupuesto I Sem (Mayor a Menor)</option>
+                                <option value="presupuestoII:desc">Presupuesto II Sem (Mayor a Menor)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-3">
+                        <button onclick="openMetaModal()" class="px-4 py-2 bg-verdeOscuro hover:bg-verdeOscuro/90 text-white font-semibold text-xs rounded-xl shadow-md shadow-verdeOscuro/20 transition-all flex items-center space-x-2">
+                            <i class="fa-solid fa-plus text-xs"></i>
+                            <span>Nueva Meta PAO</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tabla de Metas Dinámica -->
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm flex-1 overflow-hidden flex flex-col">
+                    <div class="overflow-x-auto flex-1">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead id="metas-table-head" class="bg-slate-100 text-slate-700 uppercase font-bold text-[11px] border-b border-slate-200 sticky top-0 z-10"></thead>
+                            <tbody id="metas-table-body" class="divide-y divide-slate-100 text-slate-600"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- MODAL ACTIVIDAD -->
+    <div id="modal-activity" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden border border-slate-100 flex flex-col max-h-[90vh]">
+            <div class="p-6 bg-slate-900 text-white flex items-center justify-between flex-shrink-0">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-verdeOscuro flex items-center justify-center font-bold text-white">
+                        <i class="fa-solid fa-calendar-check"></i>
+                    </div>
+                    <div>
+                        <h3 id="activity-modal-title" class="font-bold text-base">Programar Actividad Municipal</h3>
+                        <p class="text-xs text-slate-400">Cronograma Oficial PAO 2026 - 2027</p>
+                    </div>
+                </div>
+                <button onclick="closeActivityModal()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-400 hover:text-white transition-all">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <form id="form-activity" onsubmit="saveActivity(event)" class="p-6 overflow-y-auto space-y-4 flex-1">
+                <input type="hidden" id="act-id">
+                
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wider">Nombre de la Actividad *</label>
+                    <input type="text" id="act-nombre" required placeholder="Ej. Día de la Sarapiqueñeidad, EcoFest..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 outline-none focus:border-verdeOscuro">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wider">Descripción de la Meta (Vínculo PAO 2026 o 2027) *</label>
+                    <select id="act-meta" required onchange="autoFillResponsableFromMeta()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 outline-none focus:border-verdeOscuro"></select>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wider">Tipo de Duración / Modalidad *</label>
+                        <select id="act-modalidad" onchange="toggleDateInputs()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 outline-none focus:border-verdeOscuro">
+                            <option value="single">Un solo día</option>
+                            <option value="range">Varios días</option>
+                            <option value="weeks">Semanas</option>
+                            <option value="month">Todo un mes</option>
+                        </select>
+                    </div>
+                    <div id="container-fecha-single">
+                        <label class="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wider">Fecha *</label>
+                        <input type="date" id="act-fecha" min="2026-10-01" max="2027-12-31" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 outline-none focus:border-verdeOscuro">
+                    </div>
+                </div>
+
+                <div id="container-fecha-range" class="grid grid-cols-1 md:grid-cols-2 gap-4 hidden">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wider">Fecha Inicio *</label>
+                        <input type="date" id="act-fecha-inicio" min="2026-10-01" max="2027-12-31" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 outline-none focus:border-verdeOscuro">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wider">Fecha Fin *</label>
+                        <input type="date" id="act-fecha-fin" min="2026-10-01" max="2027-12-31" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 outline-none focus:border-verdeOscuro">
+                    </div>
+                </div>
+
+                <div id="container-fecha-month" class="hidden">
+                    <label class="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wider">Seleccionar Mes (Oct 2026 - Dic 2027) *</label>
+                    <select id="act-mes-select" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 outline-none focus:border-verdeOscuro"></select>
+                </div>
+
+                <!-- Campos dinámicos de Actividad -->
+                <div id="activity-dynamic-fields" class="space-y-4 pt-2 border-t border-slate-100"></div>
+
+                <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
+                    <button type="button" id="btn-delete-activity" onclick="deleteCurrentActivity()" class="hidden px-4 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl font-semibold text-xs transition-all flex items-center space-x-2">
+                        <i class="fa-solid fa-trash"></i>
+                        <span>Eliminar Actividad</span>
+                    </button>
+                    <div class="flex items-center space-x-3 ml-auto">
+                        <button type="button" onclick="closeActivityModal()" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-semibold text-xs transition-all">Cancelar</button>
+                        <button type="submit" class="px-6 py-2.5 bg-verdeOscuro hover:bg-verdeOscuro/90 text-white rounded-xl font-semibold text-xs shadow-lg shadow-verdeOscuro/20 transition-all">Guardar Actividad</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL META PAO -->
+    <div id="modal-meta" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden border border-slate-100 flex flex-col max-h-[90vh]">
+            <div class="p-6 bg-slate-900 text-white flex items-center justify-between flex-shrink-0">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-verdeOscuro flex items-center justify-center font-bold text-white">
+                        <i class="fa-solid fa-bullseye"></i>
+                    </div>
+                    <div>
+                        <h3 id="meta-modal-title" class="font-bold text-base">Registrar Meta PAO</h3>
+                        <p class="text-xs text-slate-400">Plan Anual Operativo 2026 / 2027</p>
+                    </div>
+                </div>
+                <button onclick="closeMetaModal()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-400 hover:text-white transition-all">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <form id="form-meta" onsubmit="saveMeta(event)" class="p-6 overflow-y-auto space-y-4 flex-1">
+                <input type="hidden" id="meta-id">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wider">Año del PAO *</label>
+                        <select id="meta-anio" required class="w-full bg-emerald-50 border border-emerald-300 rounded-xl px-4 py-2.5 text-xs font-bold text-verdeOscuro outline-none">
+                            <option value="2027">PAO 2027</option>
+                            <option value="2026">PAO 2026</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wider">Respetar la Norma (Bloqueo) *</label>
+                        <select id="meta-norma" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 outline-none focus:border-verdeOscuro">
+                            <option value="Sí">Sí (Bloquea exceso)</option>
+                            <option value="No">No (Libre)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wider">Descripción de la Meta *</label>
+                    <textarea id="meta-desc" required rows="2" placeholder="Describa la meta del PAO..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 outline-none focus:border-verdeOscuro"></textarea>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wider">Cantidad I Semestre *</label>
+                        <input type="number" id="meta-isem" min="0" value="1" required oninput="calcTotalMetaActs()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 outline-none focus:border-verdeOscuro">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wider">Cantidad II Semestre *</label>
+                        <input type="number" id="meta-iisem" min="0" value="1" required oninput="calcTotalMetaActs()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 outline-none focus:border-verdeOscuro">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wider">Cantidad Total</label>
+                        <input type="number" id="meta-total" readonly class="w-full bg-slate-200/60 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-700 outline-none cursor-not-allowed" value="2">
+                    </div>
+                </div>
+
+                <!-- Campos dinámicos de Meta -->
+                <div id="meta-dynamic-fields" class="space-y-4 pt-2 border-t border-slate-100"></div>
+
+                <div class="pt-4 border-t border-slate-100 flex items-center justify-end space-x-3">
+                    <button type="button" onclick="closeMetaModal()" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-semibold text-xs transition-all">Cancelar</button>
+                    <button type="submit" class="px-6 py-2.5 bg-verdeOscuro hover:bg-verdeOscuro/90 text-white rounded-xl font-semibold text-xs shadow-lg shadow-verdeOscuro/20 transition-all">Guardar Meta</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL CONFIGURADOR DE ESQUEMA -->
+    <div id="modal-schema" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-3xl overflow-hidden border border-slate-100 flex flex-col max-h-[90vh]">
+            <div class="p-6 bg-slate-900 text-white flex items-center justify-between flex-shrink-0">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-verdeOscuro flex items-center justify-center font-bold text-white">
+                        <i class="fa-solid fa-gears"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-base">Editor de Campos y Esquema</h3>
+                        <p class="text-xs text-slate-400">Personaliza la estructura de Actividades y Metas PAO</p>
+                    </div>
+                </div>
+                <button onclick="closeSchemaModal()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-400 hover:text-white transition-all">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <div class="p-6 overflow-y-auto space-y-6 flex-1 bg-slate-50">
+                <div class="flex space-x-2 border-b border-slate-200 pb-4">
+                    <button onclick="switchSchemaTab('activities')" id="btn-schema-act" class="px-4 py-2 rounded-xl text-xs font-bold transition-all bg-verdeOscuro text-white shadow-sm">Campos de Actividades</button>
+                    <button onclick="switchSchemaTab('metas')" id="btn-schema-meta" class="px-4 py-2 rounded-xl text-xs font-bold transition-all bg-slate-200 text-slate-700">Campos de Metas PAO</button>
+                </div>
+
+                <div id="schema-content-act" class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h4 class="font-bold text-xs text-slate-700 uppercase">Estructura actual en Actividades</h4>
+                        <button onclick="addFieldToSchema('activities')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold shadow-sm transition-all flex items-center space-x-1">
+                            <i class="fa-solid fa-plus text-[10px]"></i>
+                            <span>Nuevo Campo</span>
+                        </button>
+                    </div>
+                    <div id="list-schema-act" class="space-y-2"></div>
+                </div>
+
+                <div id="schema-content-meta" class="space-y-4 hidden">
+                    <div class="flex items-center justify-between">
+                        <h4 class="font-bold text-xs text-slate-700 uppercase">Estructura actual en Metas PAO</h4>
+                        <button onclick="addFieldToSchema('metas')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold shadow-sm transition-all flex items-center space-x-1">
+                            <i class="fa-solid fa-plus text-[10px]"></i>
+                            <span>Nuevo Campo</span>
+                        </button>
+                    </div>
+                    <div id="list-schema-meta" class="space-y-2"></div>
+                </div>
+            </div>
+
+            <div class="p-4 bg-white border-t border-slate-200 flex justify-end flex-shrink-0">
+                <button onclick="closeSchemaModal()" class="px-6 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-semibold text-xs transition-all">Cerrar Editor</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 15 MESES: OCTUBRE 2026 A DICIEMBRE 2027 ---
+        const MONTHS_TIMELINE = [
+            { year: 2026, month: 9, name: "Octubre 2026 (PAO 2026)" },
+            { year: 2026, month: 10, name: "Noviembre 2026 (PAO 2026)" },
+            { year: 2026, month: 11, name: "Diciembre 2026 (PAO 2026)" },
+            { year: 2027, month: 0, name: "Enero 2027 (PAO 2027)" },
+            { year: 2027, month: 1, name: "Febrero 2027 (PAO 2027)" },
+            { year: 2027, month: 2, name: "Marzo 2027 (PAO 2027)" },
+            { year: 2027, month: 3, name: "Abril 2027 (PAO 2027)" },
+            { year: 2027, month: 4, name: "Mayo 2027 (PAO 2027)" },
+            { year: 2027, month: 5, name: "Junio 2027 (PAO 2027)" },
+            { year: 2027, month: 6, name: "Julio 2027 (PAO 2027)" },
+            { year: 2027, month: 7, name: "Agosto 2027 (PAO 2027)" },
+            { year: 2027, month: 8, name: "Setiembre 2027 (PAO 2027)" },
+            { year: 2027, month: 9, name: "Octubre 2027 (PAO 2027)" },
+            { year: 2027, month: 10, name: "Noviembre 2027 (PAO 2027)" },
+            { year: 2027, month: 11, name: "Diciembre 2027 (PAO 2027)" }
+        ];
+
+        const DEFAULT_DATA = {
+            schema: {
+                activities: [
+                    { key: 'responsable', label: 'Responsable', type: 'texto', base: true },
+                    { key: 'corresponsable', label: 'Corresponsable', type: 'texto', base: true },
+                    { key: 'espacio', label: 'Posible espacio de la actividad', type: 'texto', base: true },
+                    { key: 'observaciones', label: 'Otras observaciones', type: 'textarea', base: true }
+                ],
+                metas: [
+                    { key: 'presupuestoI', label: 'Presupuesto I Semestre', type: 'moneda', base: true },
+                    { key: 'presupuestoII', label: 'Presupuesto II Semestre', type: 'moneda', base: true },
+                    { key: 'presupuesto', label: 'Presupuesto asignado', type: 'moneda', base: true },
+                    { key: 'responsable', label: 'Responsable', type: 'texto', base: true }
+                ]
+            },
+            metas: [
+                {
+                    id: 'meta-2026-1',
+                    anioPao: '2026',
+                    descripcion: 'Actividades de cierre anual comunitario y rendición de cuentas 2026',
+                    isem: 0,
+                    iisem: 2,
+                    total: 2,
+                    norma: 'Sí',
+                    presupuesto: 3500000,
+                    presupuestoI: 0,
+                    presupuestoII: 3500000,
+                    responsable: 'Gestión Cultural y Desarrollo Humano'
+                },
+                {
+                    id: 'meta-1',
+                    anioPao: '2027',
+                    descripcion: 'Promoción de la identidad cantonal, cultura y recreación comunitaria',
+                    isem: 2,
+                    iisem: 2,
+                    total: 4,
+                    norma: 'Sí',
+                    presupuesto: 12000000,
+                    presupuestoI: 6000000,
+                    presupuestoII: 6000000,
+                    responsable: 'Gestión Cultural y Desarrollo Humano'
+                },
+                {
+                    id: 'meta-2',
+                    anioPao: '2027',
+                    descripcion: 'Fortalecimiento de la equidad de género, liderazgo y emprendimiento femenino',
+                    isem: 1,
+                    iisem: 2,
+                    total: 3,
+                    norma: 'Sí',
+                    presupuesto: 4500000,
+                    presupuestoI: 1500000,
+                    presupuestoII: 3000000,
+                    responsable: 'Oficina de la Mujer'
+                },
+                {
+                    id: 'meta-3',
+                    anioPao: '2027',
+                    descripcion: 'Educación ambiental, sostenibilidad y festivales ecológicos cantonales',
+                    isem: 1,
+                    iisem: 1,
+                    total: 2,
+                    norma: 'No',
+                    presupuesto: 8000000,
+                    presupuestoI: 5000000,
+                    presupuestoII: 3000000,
+                    responsable: 'Gestión Ambiental'
+                }
+            ],
+            activities: [
+                {
+                    id: 'act-2026-1',
+                    nombre: 'Festival Cultural de Cierre 2026',
+                    metaId: 'meta-2026-1',
+                    modalidad: 'single',
+                    fecha: '2026-10-24',
+                    responsable: 'Gestión Cultural y Desarrollo Humano',
+                    corresponsable: 'Alcaldía Municipal',
+                    espacio: 'Parque de Puerto Viejo',
+                    observaciones: 'Actividad correspondiente al PAO 2026.'
+                },
+                {
+                    id: 'act-1',
+                    nombre: 'Actividad con mujeres en el parque (Feria y Taller)',
+                    metaId: 'meta-2',
+                    modalidad: 'single',
+                    fecha: '2027-03-08',
+                    responsable: 'Oficina de la Mujer',
+                    corresponsable: 'Desarrollo Humano',
+                    espacio: 'Parque de Puerto Viejo',
+                    observaciones: 'Actividad conmemorativa con emprendedoras locales.'
+                },
+                {
+                    id: 'act-2',
+                    nombre: 'EcoFest Sarapiquí 2027',
+                    metaId: 'meta-3',
+                    modalidad: 'month',
+                    fechaInicio: '2027-06-01',
+                    fechaFin: '2027-06-30',
+                    responsable: 'Gestión Ambiental',
+                    corresponsable: 'Comisión Ambiental',
+                    espacio: 'Todo el Cantón / Múltiples Sedes',
+                    observaciones: 'Festival ambiental durante todo el mes de junio.'
+                },
+                {
+                    id: 'act-3',
+                    nombre: 'Día de la Sarapiqueñeidad',
+                    metaId: 'meta-1',
+                    modalidad: 'range',
+                    fechaInicio: '2027-11-18',
+                    fechaFin: '2027-11-21',
+                    responsable: 'Comisión de Cultura',
+                    corresponsable: 'Concejo Municipal',
+                    espacio: 'Parque Central y Muelle de Puerto Viejo',
+                    observaciones: 'Celebración cultural cantonal.'
+                }
+            ]
+        };
+
+        // Carga segura desde localStorage preservando lo que el usuario ya subió
+        let appData = DEFAULT_DATA;
+        try {
+            const raw = localStorage.getItem('pao_2027_sarapiqui');
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                if (parsed && Array.isArray(parsed.metas) && Array.isArray(parsed.activities)) {
+                    appData = parsed;
+                    if (!appData.schema || !Array.isArray(appData.schema.activities) || !Array.isArray(appData.schema.metas)) {
+                        appData.schema = JSON.parse(JSON.stringify(DEFAULT_DATA.schema));
+                    }
+                    // Asegurar que exista el campo Corresponsable
+                    if (!appData.schema.activities.some(f => f.key === 'corresponsable')) {
+                        appData.schema.activities.splice(1, 0, { key: 'corresponsable', label: 'Corresponsable', type: 'texto', base: true });
+                    }
+                    // Asegurar que todas las metas existentes tengan anioPao ('2027' por defecto para no perder nada)
+                    appData.metas.forEach(m => {
+                        if (!m.anioPao) m.anioPao = '2027';
+                    });
+                }
+            }
+        } catch (e) {
+            appData = JSON.parse(JSON.stringify(DEFAULT_DATA));
+        }
+
+        let currentTimelineIndex = 0; // 0 = Octubre 2026
+        let currentYearFilter = 'all'; // 'all' | '2026' | '2027'
+        let currentSort = { col: 'default', dir: 'asc' };
+        let draggedActId = null;
+
+        function getActDateStr(act) {
+            return act.fecha || act.fechaInicio || '2027-01-01';
+        }
+
+        function getSemFromDate(dateStr) {
+            if (!dateStr || typeof dateStr !== 'string') return '1';
+            const parts = dateStr.split('-');
+            if (parts.length < 2) return '1';
+            const m = parseInt(parts[1], 10);
+            return m <= 6 ? '1' : '2';
+        }
+
+        function getYearFromDate(dateStr) {
+            if (!dateStr || typeof dateStr !== 'string') return '2027';
+            return dateStr.substring(0, 4);
+        }
+
+        function saveState() {
+            localStorage.setItem('pao_2027_sarapiqui', JSON.stringify(appData));
+            updateKPIs();
+        }
+
+        function setYearFilter(y) {
+            currentYearFilter = y;
+            const btns = [
+                { id: 'btn-filter-all', val: 'all' },
+                { id: 'btn-filter-2026', val: '2026' },
+                { id: 'btn-filter-2027', val: '2027' },
+                { id: 'tab-meta-all', val: 'all' },
+                { id: 'tab-meta-2026', val: '2026' },
+                { id: 'tab-meta-2027', val: '2027' }
+            ];
+            btns.forEach(b => {
+                const el = document.getElementById(b.id);
+                if (!el) return;
+                if (b.val === y) {
+                    el.className = 'px-3 py-1.5 rounded-lg bg-verdeOscuro text-white transition-all';
+                } else {
+                    el.className = 'px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all';
+                }
+            });
+            renderCalendar();
+            renderMetasTable();
+            updateKPIs();
+        }
+
+        function resetFactoryData() {
+            Swal.fire({
+                title: '¿Restaurar datos de fábrica?',
+                text: 'Se perderán los cambios locales y se cargarán los datos iniciales de demostración.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#278C70',
+                cancelButtonColor: '#cbd5e1',
+                confirmButtonText: 'Sí, restaurar',
+                cancelButtonText: 'Cancelar'
+            }).then((res) => {
+                if(res.isConfirmed) {
+                    appData = JSON.parse(JSON.stringify(DEFAULT_DATA));
+                    saveState();
+                    initApp();
+                    Swal.fire('Restaurado', 'El sistema ha vuelto a los valores iniciales.', 'success');
+                }
+            });
+        }
+
+        function switchView(viewId) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+
+            document.getElementById('nav-cronograma').className = viewId === 'view-cronograma'
+                ? 'w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all bg-verdeOscuro text-white shadow-lg shadow-verdeOscuro/30'
+                : 'w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all text-slate-300 hover:bg-slate-800 hover:text-white';
+
+            document.getElementById('nav-metas').className = viewId === 'view-metas'
+                ? 'w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all bg-verdeOscuro text-white shadow-lg shadow-verdeOscuro/30'
+                : 'w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all text-slate-300 hover:bg-slate-800 hover:text-white';
+
+            if(viewId === 'view-cronograma') renderCalendar();
+            else renderMetasTable();
+            updateKPIs();
+        }
+
+        function populateMonthSelectors() {
+            const sel1 = document.getElementById('month-selector');
+            const sel2 = document.getElementById('act-mes-select');
+            sel1.innerHTML = '';
+            sel2.innerHTML = '';
+            MONTHS_TIMELINE.forEach((m, idx) => {
+                const o1 = document.createElement('option');
+                o1.value = idx;
+                o1.textContent = m.name;
+                sel1.appendChild(o1);
+
+                const o2 = document.createElement('option');
+                o2.value = idx;
+                o2.textContent = m.name;
+                sel2.appendChild(o2);
+            });
+            sel1.value = currentTimelineIndex;
+        }
+
+        function changeMonth(dir) {
+            currentTimelineIndex = (currentTimelineIndex + dir + MONTHS_TIMELINE.length) % MONTHS_TIMELINE.length;
+            document.getElementById('month-selector').value = currentTimelineIndex;
+            renderCalendar();
+        }
+
+        function jumpToMonthIndex(idx) {
+            currentTimelineIndex = parseInt(idx, 10) || 0;
+            document.getElementById('month-selector').value = currentTimelineIndex;
+            renderCalendar();
+        }
+
+        function renderCalendar() {
+            const period = MONTHS_TIMELINE[currentTimelineIndex] || MONTHS_TIMELINE[0];
+            const currentYear = period.year;
+            const currentMonth = period.month;
+            document.getElementById('month-selector').value = currentTimelineIndex;
+
+            updateMetaSelects();
+
+            const grid = document.getElementById('calendar-grid');
+            grid.innerHTML = '';
+
+            const firstDayIndex = new Date(currentYear, currentMonth, 1).getDay();
+            const startingDay = (firstDayIndex === 0) ? 6 : firstDayIndex - 1;
+            const totalDays = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+            const filterMeta = document.getElementById('filter-meta').value;
+            const filterSem = document.getElementById('filter-semestre').value;
+
+            for(let i = 0; i < startingDay; i++) {
+                const emptyCell = document.createElement('div');
+                emptyCell.className = 'bg-slate-50/50 min-h-[105px] p-2 opacity-40';
+                grid.appendChild(emptyCell);
+            }
+
+            for(let day = 1; day <= totalDays; day++) {
+                const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                
+                const cell = document.createElement('div');
+                cell.className = 'bg-white min-h-[110px] p-2 flex flex-col transition-all hover:bg-slate-50/80 cursor-pointer group relative';
+                
+                // Drag & Drop en la celda
+                cell.ondragover = (e) => {
+                    e.preventDefault();
+                    cell.classList.add('drop-cell-hover');
+                };
+                cell.ondragleave = () => {
+                    cell.classList.remove('drop-cell-hover');
+                };
+                cell.ondrop = (e) => {
+                    e.preventDefault();
+                    cell.classList.remove('drop-cell-hover');
+                    const actId = e.dataTransfer.getData('text/plain') || draggedActId;
+                    if (actId) moveActivityToNewDate(actId, dateStr);
+                };
+
+                cell.onclick = (e) => {
+                    if(e.target === cell || (e.target.tagName === 'SPAN' && e.target.classList.contains('day-num'))) {
+                        openActivityModalForDate(dateStr);
+                    }
+                };
+
+                const dayHeader = document.createElement('div');
+                dayHeader.className = 'flex items-center justify-between mb-1';
+                dayHeader.innerHTML = `<span class="day-num font-bold text-xs text-slate-700 w-6 h-6 rounded-full flex items-center justify-center bg-slate-100 group-hover:bg-verdeOscuro group-hover:text-white transition-all">${day}</span>`;
+                cell.appendChild(dayHeader);
+
+                const actsContainer = document.createElement('div');
+                actsContainer.className = 'space-y-1 overflow-y-auto max-h-[85px] flex-1';
+
+                const matchedActs = appData.activities.filter(act => {
+                    let inDate = false;
+                    if(act.modalidad === 'single') {
+                        inDate = (act.fecha === dateStr);
+                    } else {
+                        let start = act.fechaInicio || act.fecha;
+                        let end = act.fechaFin || act.fecha;
+                        inDate = (dateStr >= start && dateStr <= end);
+                    }
+                    if(!inDate) return false;
+
+                    if (currentYearFilter !== 'all') {
+                        if (act.metaId !== 'none') {
+                            const m = appData.metas.find(x => x.id === act.metaId);
+                            if (m && String(m.anioPao || '2027') !== currentYearFilter) return false;
+                        } else {
+                            if (getYearFromDate(getActDateStr(act)) !== currentYearFilter) return false;
+                        }
+                    }
+
+                    if(filterMeta !== 'all') {
+                        if(filterMeta === 'none' && act.metaId !== 'none') return false;
+                        if(filterMeta !== 'none' && act.metaId !== filterMeta) return false;
+                    }
+
+                    if(filterSem !== 'all') {
+                        if(getSemFromDate(dateStr) !== filterSem) return false;
+                    }
+                    return true;
+                });
+
+                matchedActs.forEach(act => {
+                    const metaObj = appData.metas.find(m => m.id === act.metaId);
+                    const paoYear = metaObj ? (metaObj.anioPao || '2027') : getYearFromDate(getActDateStr(act));
+
+                    const badge = document.createElement('div');
+                    const colorClasses = paoYear === '2026'
+                        ? 'bg-amber-500/15 border-amber-500/40 text-amber-900 hover:bg-amber-600 hover:text-white'
+                        : 'bg-verdeOscuro/10 border-verdeOscuro/30 text-verdeOscuro hover:bg-verdeOscuro hover:text-white';
+
+                    badge.className = `${colorClasses} border rounded-lg px-2 py-1 text-[11px] font-semibold truncate transition-all shadow-xs flex items-center justify-between cursor-grab active:cursor-grabbing`;
+                    badge.title = `[PAO ${paoYear}] ${act.nombre} | Resp: ${act.responsable || '-'} | Corresp: ${act.corresponsable || '-'}`;
+                    badge.setAttribute('draggable', 'true');
+
+                    badge.ondragstart = (e) => {
+                        e.stopPropagation();
+                        draggedActId = act.id;
+                        e.dataTransfer.setData('text/plain', act.id);
+                    };
+                    badge.ondragend = () => {
+                        draggedActId = null;
+                        document.querySelectorAll('.drop-cell-hover').forEach(el => el.classList.remove('drop-cell-hover'));
+                    };
+
+                    badge.innerHTML = `<span class="truncate"><i class="fa-solid fa-grip-vertical text-[9px] opacity-50 mr-1"></i>[${paoYear.slice(-2)}] ${act.nombre}</span>`;
+                    badge.onclick = (e) => {
+                        e.stopPropagation();
+                        openActivityModalForEdit(act.id);
+                    };
+                    actsContainer.appendChild(badge);
+                });
+
+                cell.appendChild(actsContainer);
+                grid.appendChild(cell);
+            }
+            updateKPIs();
+        }
+
+        function moveActivityToNewDate(actId, newDateStr) {
+            const act = appData.activities.find(a => a.id === actId);
+            if (!act) return;
+            if (act.modalidad === 'month') {
+                Swal.fire({ toast: true, position: 'top-end', icon: 'info', title: 'Actividad de mes completo. Edítala con un clic si deseas cambiar su mes.', showConfirmButton: false, timer: 2500 });
+                return;
+            }
+
+            const newSem = getSemFromDate(newDateStr);
+            if (act.metaId !== 'none') {
+                const meta = appData.metas.find(m => m.id === act.metaId);
+                if (meta && meta.norma === 'Sí') {
+                    const countSem = appData.activities.filter(a => a.metaId === act.metaId && a.id !== act.id && getSemFromDate(getActDateStr(a)) === newSem).length;
+                    const limitSem = newSem === '1' ? meta.isem : meta.iisem;
+                    if (countSem >= limitSem) {
+                        Swal.fire({ title: '🚫 Límite Normativo Alcanzado', text: `No se puede mover al ${newSem === '1' ? 'I Semestre' : 'II Semestre'} porque ya tiene el cupo completo (${limitSem} de ${limitSem}).`, icon: 'error', confirmButtonColor: '#278C70' });
+                        return;
+                    }
+                }
+            }
+
+            if (act.modalidad === 'single') {
+                act.fecha = newDateStr;
+            } else {
+                const [y1, m1, d1] = (act.fechaInicio || newDateStr).split('-').map(Number);
+                const [y2, m2, d2] = (act.fechaFin || newDateStr).split('-').map(Number);
+                const diffDays = Math.round((new Date(y2, m2 - 1, d2) - new Date(y1, m1 - 1, d1)) / (1000 * 3600 * 24));
+                const [ny, nm, nd] = newDateStr.split('-').map(Number);
+                const endObj = new Date(ny, nm - 1, nd + diffDays);
+                act.fechaInicio = newDateStr;
+                act.fechaFin = `${endObj.getFullYear()}-${String(endObj.getMonth() + 1).padStart(2, '0')}-${String(endObj.getDate()).padStart(2, '0')}`;
+            }
+
+            saveState();
+            renderCalendar();
+            Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: `Actividad movida al ${newDateStr}`, showConfirmButton: false, timer: 1600 });
+        }
+
+        function updateMetaSelects() {
+            const selectAct = document.getElementById('act-meta');
+            const filterSelect = document.getElementById('filter-meta');
+            const prevActVal = selectAct.value;
+            const prevFilterVal = filterSelect.value;
+
+            selectAct.innerHTML = '<option value="none">No asignado en el PAO (Libre)</option>';
+            filterSelect.innerHTML = '<option value="all">Todas las metas</option><option value="none">No asignado en el PAO</option>';
+
+            appData.metas.forEach(meta => {
+                const anio = meta.anioPao || '2027';
+                const progI = appData.activities.filter(a => a.metaId === meta.id && getSemFromDate(getActDateStr(a)) === '1').length;
+                const progII = appData.activities.filter(a => a.metaId === meta.id && getSemFromDate(getActDateStr(a)) === '2').length;
+                const dispI = meta.isem - progI;
+                const dispII = meta.iisem - progII;
+
+                const opt = document.createElement('option');
+                opt.value = meta.id;
+                opt.textContent = `[PAO ${anio}] ${meta.descripcion.substring(0, 45)}... [Disp. I Sem: ${dispI} | II Sem: ${dispII}]`;
+                selectAct.appendChild(opt);
+
+                if (currentYearFilter === 'all' || String(anio) === currentYearFilter) {
+                    const fOpt = document.createElement('option');
+                    fOpt.value = meta.id;
+                    fOpt.textContent = `[PAO ${anio}] ${meta.descripcion.substring(0, 38)}...`;
+                    filterSelect.appendChild(fOpt);
+                }
+            });
+
+            if ([...selectAct.options].some(o => o.value === prevActVal)) selectAct.value = prevActVal;
+            if ([...filterSelect.options].some(o => o.value === prevFilterVal)) filterSelect.value = prevFilterVal;
+        }
+
+        function autoFillResponsableFromMeta() {
+            const metaId = document.getElementById('act-meta').value;
+            const respEl = document.getElementById('dyn-act-responsable');
+            if (respEl && metaId && metaId !== 'none') {
+                const m = appData.metas.find(x => x.id === metaId);
+                if (m && m.responsable) respEl.value = m.responsable;
+            }
+        }
+
+        function toggleDateInputs() {
+            const mod = document.getElementById('act-modalidad').value;
+            document.getElementById('container-fecha-single').classList.add('hidden');
+            document.getElementById('container-fecha-range').classList.add('hidden');
+            document.getElementById('container-fecha-month').classList.add('hidden');
+
+            if(mod === 'single') document.getElementById('container-fecha-single').classList.remove('hidden');
+            else if(mod === 'range' || mod === 'weeks') document.getElementById('container-fecha-range').classList.remove('hidden');
+            else if(mod === 'month') document.getElementById('container-fecha-month').classList.remove('hidden');
+        }
+
+        function renderActivityDynamicFields(existingData = {}) {
+            const container = document.getElementById('activity-dynamic-fields');
+            container.innerHTML = '';
+
+            appData.schema.activities.forEach(field => {
+                const div = document.createElement('div');
+                div.innerHTML = `<label class="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wider">${field.label}</label>`;
+                
+                const val = existingData[field.key] || '';
+                if(field.type === 'textarea') {
+                    div.innerHTML += `<textarea id="dyn-act-${field.key}" rows="2" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 outline-none focus:border-verdeOscuro">${val}</textarea>`;
+                } else if(field.type === 'numero' || field.type === 'moneda') {
+                    div.innerHTML += `<input type="number" id="dyn-act-${field.key}" value="${val}" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 outline-none focus:border-verdeOscuro">`;
+                } else {
+                    div.innerHTML += `<input type="text" id="dyn-act-${field.key}" value="${val}" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 outline-none focus:border-verdeOscuro">`;
+                }
+                container.appendChild(div);
+            });
+        }
+
+        function openActivityModalForDate(dateStr) {
+            document.getElementById('activity-modal-title').innerText = 'Programar Actividad Municipal';
+            document.getElementById('form-activity').reset();
+            document.getElementById('act-id').value = '';
+            document.getElementById('act-fecha').value = dateStr;
+            document.getElementById('act-fecha-inicio').value = dateStr;
+            document.getElementById('act-fecha-fin').value = dateStr;
+            document.getElementById('act-mes-select').value = currentTimelineIndex;
+            document.getElementById('btn-delete-activity').classList.add('hidden');
+            
+            updateMetaSelects();
+            renderActivityDynamicFields();
+            toggleDateInputs();
+            document.getElementById('modal-activity').classList.remove('hidden');
+            document.getElementById('modal-activity').classList.add('flex');
+        }
+
+        function openActivityModalForEdit(actId) {
+            const act = appData.activities.find(a => a.id === actId);
+            if(!act) return;
+
+            document.getElementById('activity-modal-title').innerText = 'Editar / Eliminar Actividad';
+            document.getElementById('act-id').value = act.id;
+            document.getElementById('act-nombre').value = act.nombre;
+            
+            updateMetaSelects();
+            document.getElementById('act-meta').value = act.metaId;
+            document.getElementById('act-modalidad').value = act.modalidad || 'single';
+            
+            if(act.modalidad === 'single') {
+                document.getElementById('act-fecha').value = act.fecha || '';
+            } else if(act.modalidad === 'range' || act.modalidad === 'weeks') {
+                document.getElementById('act-fecha-inicio').value = act.fechaInicio || '';
+                document.getElementById('act-fecha-fin').value = act.fechaFin || '';
+            } else if(act.modalidad === 'month') {
+                document.getElementById('act-mes-select').value = currentTimelineIndex;
+            }
+
+            toggleDateInputs();
+            renderActivityDynamicFields(act);
+            document.getElementById('btn-delete-activity').classList.remove('hidden');
+
+            document.getElementById('modal-activity').classList.remove('hidden');
+            document.getElementById('modal-activity').classList.add('flex');
+        }
+
+        function closeActivityModal() {
+            document.getElementById('modal-activity').classList.add('hidden');
+            document.getElementById('modal-activity').classList.remove('flex');
+        }
+
+        function saveActivity(e) {
+            e.preventDefault();
+            const id = document.getElementById('act-id').value;
+            const nombre = document.getElementById('act-nombre').value;
+            const metaId = document.getElementById('act-meta').value;
+            const modalidad = document.getElementById('act-modalidad').value;
+
+            let fechaInicioRef = '';
+            let fechaFinRef = '';
+
+            if(modalidad === 'single') {
+                fechaInicioRef = document.getElementById('act-fecha').value;
+                fechaFinRef = fechaInicioRef;
+            } else if(modalidad === 'range' || modalidad === 'weeks') {
+                fechaInicioRef = document.getElementById('act-fecha-inicio').value;
+                fechaFinRef = document.getElementById('act-fecha-fin').value;
+            } else if(modalidad === 'month') {
+                const tIdx = parseInt(document.getElementById('act-mes-select').value, 10) || 0;
+                const p = MONTHS_TIMELINE[tIdx] || MONTHS_TIMELINE[0];
+                fechaInicioRef = `${p.year}-${String(p.month + 1).padStart(2, '0')}-01`;
+                const lastDay = new Date(p.year, p.month + 1, 0).getDate();
+                fechaFinRef = `${p.year}-${String(p.month + 1).padStart(2, '0')}-${lastDay}`;
+            }
+
+            const sem = getSemFromDate(fechaInicioRef);
+
+            if(metaId !== 'none') {
+                const meta = appData.metas.find(m => m.id === metaId);
+                if(meta && meta.norma === 'Sí') {
+                    const existingActs = appData.activities.filter(a => a.metaId === metaId && a.id !== id);
+                    const countSem = existingActs.filter(a => getSemFromDate(getActDateStr(a)) === sem).length;
+                    const limitSem = (sem === '1') ? meta.isem : meta.iisem;
+
+                    if(countSem >= limitSem) {
+                        Swal.fire({
+                            title: `🚫 Límite Normativo Alcanzado (${sem === '1' ? 'I Semestre' : 'II Semestre'})`,
+                            text: `Ya se programó la totalidad de actividades planificadas en el PAO para este semestre (${limitSem} de ${limitSem} programadas).`,
+                            icon: 'error',
+                            confirmButtonColor: '#278C70'
+                        });
+                        return;
+                    }
+                }
+            }
+
+            const dynamicValues = {};
+            appData.schema.activities.forEach(field => {
+                const el = document.getElementById(`dyn-act-${field.key}`);
+                if(el) dynamicValues[field.key] = el.value;
+            });
+
+            const actObj = {
+                id: id || 'act-' + Date.now(),
+                nombre,
+                metaId,
+                modalidad,
+                fecha: modalidad === 'single' ? fechaInicioRef : undefined,
+                fechaInicio: modalidad !== 'single' ? fechaInicioRef : undefined,
+                fechaFin: modalidad !== 'single' ? fechaFinRef : undefined,
+                ...dynamicValues
+            };
+
+            if(id) {
+                const idx = appData.activities.findIndex(a => a.id === id);
+                if(idx !== -1) appData.activities[idx] = actObj;
+            } else {
+                appData.activities.push(actObj);
+            }
+
+            saveState();
+            closeActivityModal();
+            renderCalendar();
+            Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Actividad guardada correctamente', showConfirmButton: false, timer: 2000 });
+        }
+
+        function deleteCurrentActivity() {
+            const id = document.getElementById('act-id').value;
+            if(!id) return;
+
+            Swal.fire({
+                title: '¿Eliminar actividad?',
+                text: 'La actividad se borrará del cronograma y se liberará el espacio en la meta PAO.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#e11d48',
+                cancelButtonColor: '#cbd5e1',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            }).then((res) => {
+                if(res.isConfirmed) {
+                    appData.activities = appData.activities.filter(a => a.id !== id);
+                    saveState();
+                    closeActivityModal();
+                    renderCalendar();
+                    Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Actividad eliminada', showConfirmButton: false, timer: 2000 });
+                }
+            });
+        }
+
+        // --- ORDENAMIENTO Y TABLA DE METAS PAO ---
+        function sortByCol(colKey) {
+            if (currentSort.col === colKey) {
+                currentSort.dir = currentSort.dir === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSort.col = colKey;
+                currentSort.dir = colKey.includes('presupuesto') ? 'desc' : 'asc';
+            }
+            renderMetasTable();
+        }
+
+        function applySelectSort() {
+            const val = document.getElementById('sort-metas-select').value;
+            if (val === 'default') {
+                currentSort = { col: 'default', dir: 'asc' };
+            } else {
+                const [c, d] = val.split(':');
+                currentSort = { col: c, dir: d };
+            }
+            renderMetasTable();
+        }
+
+        function renderMetasTable() {
+            const thead = document.getElementById('metas-table-head');
+            const tbody = document.getElementById('metas-table-body');
+            
+            let headHTML = `<tr>
+                <th onclick="sortByCol('anioPao')" class="p-3 text-center sortable-th">Año PAO <i class="fa-solid fa-sort ml-1 text-slate-400"></i></th>
+                <th onclick="sortByCol('descripcion')" class="p-3 sortable-th">Descripción de la Meta <i class="fa-solid fa-sort ml-1 text-slate-400"></i></th>
+                <th onclick="sortByCol('isem')" class="p-3 text-center sortable-th">I Sem</th>
+                <th onclick="sortByCol('iisem')" class="p-3 text-center sortable-th">II Sem</th>
+                <th onclick="sortByCol('total')" class="p-3 text-center sortable-th">Total</th>
+                <th class="p-3 text-center">Norma</th>
+                <th class="p-3 text-center">Por Programar</th>`;
+
+            appData.schema.metas.forEach(f => {
+                headHTML += `<th onclick="sortByCol('${f.key}')" class="p-3 sortable-th">${f.label} <i class="fa-solid fa-sort ml-1 text-slate-400"></i></th>`;
+            });
+            headHTML += `<th class="p-3 text-center">Acciones</th></tr>`;
+            thead.innerHTML = headHTML;
+
+            let list = appData.metas.filter(m => currentYearFilter === 'all' || String(m.anioPao || '2027') === currentYearFilter);
+
+            if (currentSort.col !== 'default') {
+                const c = currentSort.col;
+                const factor = currentSort.dir === 'asc' ? 1 : -1;
+                list.sort((a, b) => {
+                    if (typeof a[c] === 'number' || typeof b[c] === 'number') {
+                        return ((Number(a[c]) || 0) - (Number(b[c]) || 0)) * factor;
+                    }
+                    return String(a[c] || '').localeCompare(String(b[c] || ''), 'es') * factor;
+                });
+            }
+
+            tbody.innerHTML = '';
+            list.forEach(meta => {
+                const anio = meta.anioPao || '2027';
+                const progI = appData.activities.filter(a => a.metaId === meta.id && getSemFromDate(getActDateStr(a)) === '1').length;
+                const progII = appData.activities.filter(a => a.metaId === meta.id && getSemFromDate(getActDateStr(a)) === '2').length;
+                const totalProg = progI + progII;
+                const pend = meta.total - totalProg;
+
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50 border-b border-slate-100 transition-all';
+                
+                let rowHTML = `
+                    <td class="p-3 text-center">
+                        <span class="px-2 py-1 rounded-lg text-[10px] font-extrabold ${anio === '2026' ? 'bg-amber-100 text-amber-800 border border-amber-300' : 'bg-emerald-100 text-verdeOscuro border border-emerald-300'}">
+                            PAO ${anio}
+                        </span>
+                    </td>
+                    <td class="p-3 font-semibold text-slate-800 max-w-xs">${meta.descripcion}</td>
+                    <td class="p-3 text-center font-bold text-slate-700">${meta.isem}</td>
+                    <td class="p-3 text-center font-bold text-slate-700">${meta.iisem}</td>
+                    <td class="p-3 text-center font-bold text-verdeOscuro">${meta.total}</td>
+                    <td class="p-3 text-center">
+                        <span class="px-2 py-1 rounded-full text-[10px] font-bold ${meta.norma === 'Sí' ? 'bg-rose-50 text-rose-600 border border-rose-200' : 'bg-emerald-50 text-emerald-600 border border-emerald-200'}">
+                            ${meta.norma === 'Sí' ? '🔒 Sí' : '🔓 No'}
+                        </span>
+                    </td>
+                    <td class="p-3 text-center">
+                        ${pend <= 0 ? '<span class="px-2 py-1 bg-emerald-50 text-emerald-700 font-bold rounded-lg border border-emerald-200">Meta Completa</span>' : `<span class="font-bold text-amber-600">${pend} pendientes</span> <span class="text-[10px] text-slate-400 block">(I:${Math.max(0, meta.isem - progI)} | II:${Math.max(0, meta.iisem - progII)})</span>`}
+                    </td>`;
+
+                appData.schema.metas.forEach(f => {
+                    let val = meta[f.key] ?? '-';
+                    if(f.type === 'moneda' && typeof val === 'number') {
+                        val = '₡' + val.toLocaleString('es-CR');
+                    }
+                    rowHTML += `<td class="p-3 font-medium text-slate-700">${val}</td>`;
+                });
+
+                rowHTML += `
+                    <td class="p-3 text-center space-x-2">
+                        <button onclick="openMetaModalForEdit('${meta.id}')" class="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-all" title="Editar Meta">
+                            <i class="fa-solid fa-pen text-xs"></i>
+                        </button>
+                        <button onclick="deleteMetaPrompt('${meta.id}')" class="p-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg transition-all" title="Eliminar Meta">
+                            <i class="fa-solid fa-trash text-xs"></i>
+                        </button>
+                    </td>
+                `;
+
+                tr.innerHTML = rowHTML;
+                tbody.appendChild(tr);
+            });
+            updateKPIs();
+        }
+
+        function calcAutoPresupuestoTotal() {
+            const p1 = document.getElementById('dyn-meta-presupuestoI');
+            const p2 = document.getElementById('dyn-meta-presupuestoII');
+            const pTot = document.getElementById('dyn-meta-presupuesto');
+            if (pTot && (p1 || p2)) {
+                const v1 = p1 ? (parseFloat(p1.value) || 0) : 0;
+                const v2 = p2 ? (parseFloat(p2.value) || 0) : 0;
+                pTot.value = v1 + v2;
+            }
+        }
+
+        function renderMetaDynamicFields(existingData = {}) {
+            const container = document.getElementById('meta-dynamic-fields');
+            container.innerHTML = '';
+
+            appData.schema.metas.forEach(field => {
+                const div = document.createElement('div');
+                const val = existingData[field.key] ?? '';
+
+                if (field.key === 'presupuestoI' || field.key === 'presupuestoII') {
+                    div.innerHTML = `
+                        <label class="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wider">${field.label} (₡)</label>
+                        <input type="number" id="dyn-meta-${field.key}" value="${val}" oninput="calcAutoPresupuestoTotal()" placeholder="0" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 outline-none focus:border-verdeOscuro">
+                    `;
+                } else if (field.key === 'presupuesto') {
+                    div.innerHTML = `
+                        <label class="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wider">${field.label} (Suma Automática I + II Sem)</label>
+                        <input type="number" id="dyn-meta-${field.key}" value="${val}" readonly class="w-full bg-slate-200/70 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold text-verdeOscuro outline-none cursor-not-allowed">
+                    `;
+                } else if(field.type === 'moneda' || field.type === 'numero') {
+                    div.innerHTML = `
+                        <label class="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wider">${field.label}</label>
+                        <input type="number" id="dyn-meta-${field.key}" value="${val}" placeholder="0" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 outline-none focus:border-verdeOscuro">
+                    `;
+                } else {
+                    div.innerHTML = `
+                        <label class="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wider">${field.label}</label>
+                        <input type="text" id="dyn-meta-${field.key}" value="${val}" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 outline-none focus:border-verdeOscuro">
+                    `;
+                }
+                container.appendChild(div);
+            });
+            calcAutoPresupuestoTotal();
+        }
+
+        function calcTotalMetaActs() {
+            const isem = parseInt(document.getElementById('meta-isem').value) || 0;
+            const iisem = parseInt(document.getElementById('meta-iisem').value) || 0;
+            document.getElementById('meta-total').value = isem + iisem;
+        }
+
+        function openMetaModal() {
+            document.getElementById('meta-modal-title').innerText = 'Registrar Meta PAO';
+            document.getElementById('form-meta').reset();
+            document.getElementById('meta-id').value = '';
+            document.getElementById('meta-anio').value = currentYearFilter === '2026' ? '2026' : '2027';
+            document.getElementById('meta-total').value = 2;
+            renderMetaDynamicFields();
+            document.getElementById('modal-meta').classList.remove('hidden');
+            document.getElementById('modal-meta').classList.add('flex');
+        }
+
+        function openMetaModalForEdit(metaId) {
+            const meta = appData.metas.find(m => m.id === metaId);
+            if(!meta) return;
+
+            document.getElementById('meta-modal-title').innerText = 'Editar Meta PAO';
+            document.getElementById('meta-id').value = meta.id;
+            document.getElementById('meta-anio').value = meta.anioPao || '2027';
+            document.getElementById('meta-desc').value = meta.descripcion;
+            document.getElementById('meta-isem').value = meta.isem;
+            document.getElementById('meta-iisem').value = meta.iisem;
+            document.getElementById('meta-total').value = meta.total;
+            document.getElementById('meta-norma').value = meta.norma;
+
+            renderMetaDynamicFields(meta);
+            document.getElementById('modal-meta').classList.remove('hidden');
+            document.getElementById('modal-meta').classList.add('flex');
+        }
+
+        function closeMetaModal() {
+            document.getElementById('modal-meta').classList.add('hidden');
+            document.getElementById('modal-meta').classList.remove('flex');
+        }
+
+        function saveMeta(e) {
+            e.preventDefault();
+            const id = document.getElementById('meta-id').value;
+            const anioPao = document.getElementById('meta-anio').value;
+            const descripcion = document.getElementById('meta-desc').value;
+            const isem = parseInt(document.getElementById('meta-isem').value) || 0;
+            const iisem = parseInt(document.getElementById('meta-iisem').value) || 0;
+            const total = isem + iisem;
+            const norma = document.getElementById('meta-norma').value;
+
+            calcAutoPresupuestoTotal();
+
+            const dynamicValues = {};
+            appData.schema.metas.forEach(field => {
+                const el = document.getElementById(`dyn-meta-${field.key}`);
+                if(el) {
+                    dynamicValues[field.key] = field.type === 'moneda' || field.type === 'numero' ? (parseFloat(el.value) || 0) : el.value;
+                }
+            });
+            dynamicValues.presupuesto = (Number(dynamicValues.presupuestoI) || 0) + (Number(dynamicValues.presupuestoII) || 0);
+
+            const metaObj = {
+                id: id || 'meta-' + Date.now(),
+                anioPao,
+                descripcion,
+                isem,
+                iisem,
+                total,
+                norma,
+                ...dynamicValues
+            };
+
+            if(id) {
+                const idx = appData.metas.findIndex(m => m.id === id);
+                if(idx !== -1) appData.metas[idx] = metaObj;
+            } else {
+                appData.metas.push(metaObj);
+            }
+
+            saveState();
+            closeMetaModal();
+            renderMetasTable();
+            Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Meta PAO guardada correctamente', showConfirmButton: false, timer: 2000 });
+        }
+
+        function deleteMetaPrompt(metaId) {
+            const linkedActs = appData.activities.filter(a => a.metaId === metaId);
+
+            if(linkedActs.length > 0) {
+                Swal.fire({
+                    title: '⚠️ ¿Qué desea hacer con las actividades vinculadas?',
+                    html: `Esta meta tiene actualmente <b>${linkedActs.length} actividad(es)</b> programada(s) en el calendario.`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    showDenyButton: true,
+                    confirmButtonColor: '#e11d48',
+                    denyButtonColor: '#278C70',
+                    cancelButtonColor: '#cbd5e1',
+                    confirmButtonText: 'Eliminar meta y actividades',
+                    denyButtonText: 'Eliminar meta y reasignar a "Libre"',
+                    cancelButtonText: 'Cancelar'
+                }).then((result) => {
+                    if(result.isConfirmed) {
+                        appData.activities = appData.activities.filter(a => a.metaId !== metaId);
+                        appData.metas = appData.metas.filter(m => m.id !== metaId);
+                        saveState();
+                        renderMetasTable();
+                        Swal.fire('Eliminado', 'Meta y actividades vinculadas borradas.', 'success');
+                    } else if(result.isDenied) {
+                        appData.activities.forEach(a => {
+                            if(a.metaId === metaId) a.metaId = 'none';
+                        });
+                        appData.metas = appData.metas.filter(m => m.id !== metaId);
+                        saveState();
+                        renderMetasTable();
+                        Swal.fire('Actualizado', 'Meta eliminada y actividades reasignadas.', 'success');
+                    }
+                });
+            } else {
+                Swal.fire({
+                    title: '¿Eliminar Meta PAO?',
+                    text: 'Esta acción no se puede deshacer.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#e11d48',
+                    cancelButtonColor: '#cbd5e1',
+                    confirmButtonText: 'Sí, eliminar',
+                    cancelButtonText: 'Cancelar'
+                }).then((res) => {
+                    if(res.isConfirmed) {
+                        appData.metas = appData.metas.filter(m => m.id !== metaId);
+                        saveState();
+                        renderMetasTable();
+                        Swal.fire('Eliminado', 'Meta PAO eliminada.', 'success');
+                    }
+                });
+            }
+        }
+
+        function openSchemaModal() {
+            renderSchemaLists();
+            document.getElementById('modal-schema').classList.remove('hidden');
+            document.getElementById('modal-schema').classList.add('flex');
+        }
+
+        function closeSchemaModal() {
+            document.getElementById('modal-schema').classList.add('hidden');
+            document.getElementById('modal-schema').classList.remove('flex');
+            renderCalendar();
+            renderMetasTable();
+        }
+
+        function switchSchemaTab(tab) {
+            if(tab === 'activities') {
+                document.getElementById('schema-content-act').classList.remove('hidden');
+                document.getElementById('schema-content-meta').classList.add('hidden');
+                document.getElementById('btn-schema-act').className = 'px-4 py-2 rounded-xl text-xs font-bold transition-all bg-verdeOscuro text-white shadow-sm';
+                document.getElementById('btn-schema-meta').className = 'px-4 py-2 rounded-xl text-xs font-bold transition-all bg-slate-200 text-slate-700';
+            } else {
+                document.getElementById('schema-content-act').classList.add('hidden');
+                document.getElementById('schema-content-meta').classList.remove('hidden');
+                document.getElementById('btn-schema-meta').className = 'px-4 py-2 rounded-xl text-xs font-bold transition-all bg-verdeOscuro text-white shadow-sm';
+                document.getElementById('btn-schema-act').className = 'px-4 py-2 rounded-xl text-xs font-bold transition-all bg-slate-200 text-slate-700';
+            }
+        }
+
+        function renderSchemaLists() {
+            const listAct = document.getElementById('list-schema-act');
+            listAct.innerHTML = '';
+            appData.schema.activities.forEach((f, idx) => {
+                const div = document.createElement('div');
+                div.className = 'bg-white p-3 rounded-xl border border-slate-200 flex items-center justify-between shadow-xs';
+                div.innerHTML = `
+                    <div class="flex items-center space-x-2">
+                        <span class="font-bold text-xs text-slate-800">${f.label}</span>
+                        <span class="px-2 py-0.5 bg-slate-100 text-slate-500 rounded text-[10px] font-semibold uppercase">${f.type}</span>
+                    </div>
+                    <button onclick="removeFieldFromSchema('activities', ${idx})" class="text-rose-500 hover:text-rose-700 p-1 rounded transition-all">
+                        <i class="fa-solid fa-trash text-xs"></i>
+                    </button>
+                `;
+                listAct.appendChild(div);
+            });
+
+            const listMeta = document.getElementById('list-schema-meta');
+            listMeta.innerHTML = '';
+            appData.schema.metas.forEach((f, idx) => {
+                const div = document.createElement('div');
+                div.className = 'bg-white p-3 rounded-xl border border-slate-200 flex items-center justify-between shadow-xs';
+                div.innerHTML = `
+                    <div class="flex items-center space-x-2">
+                        <span class="font-bold text-xs text-slate-800">${f.label}</span>
+                        <span class="px-2 py-0.5 bg-slate-100 text-slate-500 rounded text-[10px] font-semibold uppercase">${f.type}</span>
+                    </div>
+                    <button onclick="removeFieldFromSchema('metas', ${idx})" class="text-rose-500 hover:text-rose-700 p-1 rounded transition-all">
+                        <i class="fa-solid fa-trash text-xs"></i>
+                    </button>
+                `;
+                listMeta.appendChild(div);
+            });
+        }
+
+        async function addFieldToSchema(target) {
+            const { value: formValues } = await Swal.fire({
+                title: 'Crear Nuevo Campo Personalizado',
+                html: `
+                    <input id="swal-input-label" class="swal2-input text-xs" placeholder="Nombre del campo">
+                    <select id="swal-input-type" class="swal2-select text-xs">
+                        <option value="texto">Texto</option>
+                        <option value="numero">Número</option>
+                        <option value="moneda">Moneda (₡)</option>
+                        <option value="textarea">Área de Texto</option>
+                    </select>
+                `,
+                focusConfirm: false,
+                showCancelButton: true,
+                confirmButtonColor: '#278C70',
+                cancelButtonColor: '#cbd5e1',
+                confirmButtonText: 'Crear Campo',
+                preConfirm: () => [
+                    document.getElementById('swal-input-label').value,
+                    document.getElementById('swal-input-type').value
+                ]
+            });
+
+            if(formValues && formValues[0]) {
+                appData.schema[target].push({ key: 'custom_' + Date.now(), label: formValues[0], type: formValues[1], base: false });
+                saveState();
+                renderSchemaLists();
+            }
+        }
+
+        function removeFieldFromSchema(target, idx) {
+            appData.schema[target].splice(idx, 1);
+            saveState();
+            renderSchemaLists();
+        }
+
+        function updateKPIs() {
+            const m26 = appData.metas.filter(m => String(m.anioPao) === '2026').length;
+            const m27 = appData.metas.filter(m => String(m.anioPao || '2027') === '2027').length;
+
+            const activeMetas = appData.metas.filter(m => currentYearFilter === 'all' || String(m.anioPao || '2027') === currentYearFilter);
+            const activeMetaIds = new Set(activeMetas.map(m => m.id));
+
+            const activeActs = appData.activities.filter(a => {
+                if (currentYearFilter === 'all') return true;
+                if (a.metaId !== 'none') return activeMetaIds.has(a.metaId);
+                return getYearFromDate(getActDateStr(a)) === currentYearFilter;
+            });
+
+            let planI = 0, planII = 0, pendI = 0, pendII = 0;
+            let presTotal = 0, presI = 0, presII = 0;
+
+            activeMetas.forEach(m => {
+                const i = Number(m.isem) || 0;
+                const ii = Number(m.iisem) || 0;
+                planI += i;
+                planII += ii;
+
+                const pI = appData.activities.filter(a => a.metaId === m.id && getSemFromDate(getActDateStr(a)) === '1').length;
+                const pII = appData.activities.filter(a => a.metaId === m.id && getSemFromDate(getActDateStr(a)) === '2').length;
+                pendI += Math.max(0, i - pI);
+                pendII += Math.max(0, ii - pII);
+
+                const bI = Number(m.presupuestoI) || 0;
+                const bII = Number(m.presupuestoII) || 0;
+                presI += bI;
+                presII += bII;
+                presTotal += (m.presupuesto !== undefined ? (Number(m.presupuesto) || 0) : (bI + bII));
+            });
+
+            const progI = activeActs.filter(a => getSemFromDate(getActDateStr(a)) === '1').length;
+            const progII = activeActs.filter(a => getSemFromDate(getActDateStr(a)) === '2').length;
+
+            // KPIs Cronograma
+            document.getElementById('kpi-crono-metas').innerText = activeMetas.length;
+            document.getElementById('kpi-crono-metas26').innerText = m26;
+            document.getElementById('kpi-crono-metas27').innerText = m27;
+
+            document.getElementById('kpi-crono-plan-total').innerText = planI + planII;
+            document.getElementById('kpi-crono-plan-i').innerText = planI;
+            document.getElementById('kpi-crono-plan-ii').innerText = planII;
+
+            document.getElementById('kpi-crono-prog-total').innerText = activeActs.length;
+            document.getElementById('kpi-crono-prog-i').innerText = progI;
+            document.getElementById('kpi-crono-prog-ii').innerText = progII;
+
+            document.getElementById('kpi-crono-pend-total').innerText = pendI + pendII;
+            document.getElementById('kpi-crono-pend-i').innerText = pendI;
+            document.getElementById('kpi-crono-pend-ii').innerText = pendII;
+
+            // KPIs Matriz
+            document.getElementById('meta-kpi-budget-total').innerText = '₡' + presTotal.toLocaleString('es-CR');
+            document.getElementById('meta-kpi-budget-isem').innerText = '₡' + presI.toLocaleString('es-CR');
+            document.getElementById('meta-kpi-budget-iisem').innerText = '₡' + presII.toLocaleString('es-CR');
+        }
+
+        function exportJSON() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `PAO_2026_2027_Sarapiqui.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        function importJSON(event) {
+            const fileReader = new FileReader();
+            if(event.target.files[0]) {
+                fileReader.readAsText(event.target.files[0], "UTF-8");
+                fileReader.onload = (e) => {
+                    try {
+                        const parsed = JSON.parse(e.target.result);
+                        if(parsed.metas && parsed.activities) {
+                            parsed.metas.forEach(m => { if (!m.anioPao) m.anioPao = '2027'; });
+                            appData = parsed;
+                            saveState();
+                            initApp();
+                            Swal.fire('Importado', 'Respaldo cargado exitosamente.', 'success');
+                        } else {
+                            throw new Error('Formato inválido');
+                        }
+                    } catch (err) {
+                        Swal.fire('Error', 'El archivo JSON no es válido.', 'error');
+                    }
+                };
+            }
+        }
+
+        function initApp() {
+            populateMonthSelectors();
+            updateKPIs();
+            renderCalendar();
+            renderMetasTable();
+        }
+
+        window.onload = initApp;
+    </script>
+</body>
+</html>

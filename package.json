@@ -1,0 +1,30 @@
+{
+  "name": "sistema-pao-sarapiqui",
+  "version": "1.0.0",
+  "description": "Sistema de Programación Anual y Control PAO - Municipalidad de Sarapiquí",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
+  },
+  "author": "Municipalidad de Sarapiquí",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1"
+  },
+  "build": {
+    "appId": "com.muni-sarapiqui.pao",
+    "productName": "Sistema PAO Sarapiquí",
+    "mac": {
+      "category": "public.app-category.productivity"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "linux": {
+      "target": "AppImage"
+    }
+  }
+}
